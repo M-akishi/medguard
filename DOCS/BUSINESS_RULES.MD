@@ -8,5 +8,5 @@
   pending → taken | missed
 - If not confirmed within the configured window, a dose is marked as missed
 - The confirmation window starts at the scheduled time of the dose.
-- Missed doses remain visible indefinitely
+- Missed doses remain permanently visible in the treatment history and are never deleted or altered.
 - Editing a schedule does not affect historical doses

@@ -4,7 +4,8 @@
 - Name
 - Optional notes
 - Can have multiple schedules
-- Can be inactive but never fully deleted
+- Can be marked as inactive
+- Can only be permanently deleted if it has no associated schedules, doses, or late intake records
 
 ## Schedule
 - Medication reference
