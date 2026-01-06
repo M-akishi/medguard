@@ -4,18 +4,18 @@
 - Android only
 
 ## Technology Stack
-- Language: Kotlin
-- UI: Jetpack Compose
-- Architecture: MVVM
-- Local storage: Room (SQLite)
-- Background tasks: AlarmManager / Foreground Services
-- Authentication: Android BiometricPrompt API
+- Kotlin
+- Jetpack Compose
+- MVVM
+- Room (SQLite)
+- AlarmManager / Foreground Services
+- Android BiometricPrompt API
 
 ## Core Principles
-- Local-first design
+- Local-first
 - No cloud dependency
-- Explicit user confirmation for dose intake
-- Clear separation of UI and business logic
+- Explicit user confirmation
+- Immutable historical data
 
 ## Non-Goals
 - Medical recommendations
