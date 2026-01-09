@@ -1,7 +1,12 @@
 package dev.medguard.app.domain.model
 
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import dev.medguard.app.domain.model.DayOfWeek
+
 
 /**
  * Defines when and how a medication must be taken.
@@ -27,4 +32,20 @@ data class Schedule(
 
     /** Whether this schedule is currently active */
     val isActive: Boolean = true
-)
+) {
+
+    /**
+     * Returns true if this schedule is active on the given date.
+     */
+    fun isActiveOn(date: LocalDate): Boolean {
+        val day = DayOfWeek.fromJava(date.dayOfWeek)
+        return isActive && activeDays.contains(day)
+    }
+
+    fun getScheduledDateTime(
+        date: LocalDate,
+        zoneId: ZoneId
+    ): ZonedDateTime {
+        return ZonedDateTime.of(date, time, zoneId)
+    }
+}

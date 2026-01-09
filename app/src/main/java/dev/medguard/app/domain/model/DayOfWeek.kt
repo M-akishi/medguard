@@ -10,5 +10,18 @@ enum class DayOfWeek {
     THURSDAY,
     FRIDAY,
     SATURDAY,
-    SUNDAY
+    SUNDAY;
+    companion object {
+        fun fromJava(day: java.time.DayOfWeek): DayOfWeek = when(day) {
+            java.time.DayOfWeek.MONDAY -> MONDAY
+            java.time.DayOfWeek.TUESDAY -> TUESDAY
+            java.time.DayOfWeek.WEDNESDAY -> WEDNESDAY
+            java.time.DayOfWeek.THURSDAY -> THURSDAY
+            java.time.DayOfWeek.FRIDAY -> FRIDAY
+            java.time.DayOfWeek.SATURDAY -> SATURDAY
+            java.time.DayOfWeek.SUNDAY -> SUNDAY
+        }
+    }
+
+
 }

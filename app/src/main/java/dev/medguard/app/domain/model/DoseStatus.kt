@@ -9,5 +9,6 @@ package dev.medguard.app.domain.model
 enum class DoseStatus {
     PENDING,
     TAKEN,
-    MISSED
+    MISSED,
+    SKIPPED
 }
