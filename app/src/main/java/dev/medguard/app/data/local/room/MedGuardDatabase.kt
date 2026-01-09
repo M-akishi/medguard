@@ -17,7 +17,7 @@ import dev.medguard.app.data.local.room.entity.ScheduleEntity
         DoseEntity::class
     ],
     version = 1,
-    exportSchema = true
+    exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
 abstract class MedGuardDatabase : RoomDatabase() {
