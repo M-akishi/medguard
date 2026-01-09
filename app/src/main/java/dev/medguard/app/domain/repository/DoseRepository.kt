@@ -7,19 +7,21 @@ import java.util.UUID
 
 interface DoseRepository {
 
-    fun insert(dose: Dose)
+    suspend fun insert(dose: Dose)
 
-    fun update(dose: Dose)
+    suspend fun update(dose: Dose)
 
-    fun getById(id: UUID): Dose?
+    suspend fun getById(id: UUID): Dose?
 
-    fun existsForSchedule(
+    suspend fun existsForSchedule(
         scheduleId: UUID,
         scheduledDateTime: LocalDateTime
     ): Boolean
 
-    fun getPendingDoses(): List<Dose>
+    suspend fun getPendingDoses(): List<Dose>
 
-    fun getDosesForDate(date: LocalDate): List<Dose>
-    fun getPendingDosesBefore(expirationTime: LocalDateTime): List<Dose>
+    suspend fun getDosesForDate(date: LocalDate): List<Dose>
+
+    suspend fun getPendingDosesBefore(expirationTime: LocalDateTime): List<Dose>
 }
+

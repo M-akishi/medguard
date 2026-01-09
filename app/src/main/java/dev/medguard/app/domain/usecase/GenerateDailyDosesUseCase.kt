@@ -17,7 +17,7 @@ class GenerateDailyDosesUseCase(
     private val doseRepository: DoseRepository
 ) {
 
-    fun execute(
+    suspend fun execute(
         date: LocalDate,
         zoneId: ZoneId = ZoneId.systemDefault()
     ) {

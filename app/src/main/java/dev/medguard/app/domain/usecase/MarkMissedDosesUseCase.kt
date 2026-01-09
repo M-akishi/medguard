@@ -21,7 +21,7 @@ class MarkMissedDosesUseCase(
      *
      * @return list of doses that were marked as missed
      */
-    fun execute(): List<Dose> {
+    suspend fun execute(): List<Dose> {
         val now = LocalDateTime.now(clock)
 
         val expirationTime = now.minus(confirmationWindow)

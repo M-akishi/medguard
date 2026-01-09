@@ -13,7 +13,7 @@ class CreateScheduleUseCase(
     private val scheduleRepository: ScheduleRepository
 ) {
 
-    fun execute(
+    suspend fun execute(
         medicationId: UUID,
         time: LocalTime,
         doseDescription: String,

@@ -11,7 +11,7 @@ class CreateMedicationUseCase(
     private val medicationRepository: MedicationRepository
 ) {
 
-    fun execute(
+    suspend fun execute(
         name: String,
         notes: String? = null
     ): Result<Medication> {

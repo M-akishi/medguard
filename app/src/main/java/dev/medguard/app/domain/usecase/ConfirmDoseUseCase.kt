@@ -25,7 +25,7 @@ class ConfirmDoseUseCase(
      * @param doseId Identifier of the dose to confirm
      * @return Result containing the updated Dose or a failure
      */
-    fun execute(doseId: UUID): Result<Dose> {
+    suspend fun execute(doseId: UUID): Result<Dose> {
         val dose = doseRepository.getById(doseId)
             ?: return Result.failure(IllegalStateException("Dose not found"))
 
