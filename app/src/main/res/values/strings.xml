@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">MedGuard</string>
+    <string name="label_hour">Hora</string>
+    <string name="label_minutes">Minutos</string>
+    <string name="label_description">Descripción de la dosis</string>
+    <string name="label_medicine">Medicamento</string>
+    <string name="label_days_of_week">Días de la semana</string>
+    <string name="label_active_schedule">Horario activo</string>
+    <string name="btn_save">Guardar</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="dialog_new_schedule">Nuevo horario de toma</string>
+    <string name="msg_no_medications">No tienes medicamentos creados. Primero agrega uno.</string>
+    <string name="error_invalid_time">Hora inválida (00–23 y 00–59)</string>
+    <string name="new_hour_dosis">Nuevo horario de toma</string>
 </resources>

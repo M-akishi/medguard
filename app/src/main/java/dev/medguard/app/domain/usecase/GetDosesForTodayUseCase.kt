@@ -4,9 +4,9 @@ import dev.medguard.app.domain.model.Dose
 import dev.medguard.app.domain.repository.DoseRepository
 import java.time.LocalDate
 
-class GetDosesForDateUseCase(
+class GetDosesForTodayUseCase(
     private val repository: DoseRepository
 ) {
-    suspend operator fun invoke(date: LocalDate): List<Dose> =
-        repository.getDosesForDate(date)
+    suspend operator fun invoke(): List<Dose> =
+        repository.getDosesForDate(LocalDate.now())
 }

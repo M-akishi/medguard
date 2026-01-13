@@ -11,7 +11,7 @@ class CreateMedicationUseCase(
     private val medicationRepository: MedicationRepository
 ) {
 
-    suspend fun execute(
+    suspend operator fun invoke(
         name: String,
         notes: String? = null
     ): Result<Medication> {
@@ -25,7 +25,8 @@ class CreateMedicationUseCase(
         val medication = Medication(
             id = UUID.randomUUID(),
             name = name.trim(),
-            notes = notes
+            notes = notes?.takeIf { it.isNotBlank() },
+            isActive = true
         )
 
         medicationRepository.insert(medication)
