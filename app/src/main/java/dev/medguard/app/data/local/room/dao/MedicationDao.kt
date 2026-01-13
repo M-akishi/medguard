@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.medguard.app.data.local.room.entity.MedicationEntity
-import dev.medguard.app.domain.model.Medication
 import java.util.UUID
 
 @Dao
@@ -18,5 +17,5 @@ interface MedicationDao {
     suspend fun getById(id: UUID): MedicationEntity?
 
     @Query("SELECT * FROM medications")
-    suspend fun getAll(): List<Medication>
+    suspend fun getAll(): List<MedicationEntity>
 }

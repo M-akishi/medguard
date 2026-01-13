@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.medguard.app.data.local.room.entity.ScheduleEntity
 import dev.medguard.app.domain.model.Schedule
+import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
 @Dao
@@ -15,7 +16,7 @@ interface ScheduleDao {
     suspend fun insert(schedule: ScheduleEntity)
 
     @Query("SELECT * FROM schedules WHERE medicationId = :medicationId")
-    suspend fun getByMedicationId(medicationId: UUID): List<Schedule>
+    fun getByMedicationId(medicationId: UUID): Flow<List<ScheduleEntity>>
 
     @Query("SELECT * FROM schedules WHERE isActive = 1")
     suspend fun getAllActive(): List<Schedule>

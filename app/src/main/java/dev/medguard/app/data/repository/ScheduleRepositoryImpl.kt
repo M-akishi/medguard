@@ -3,6 +3,8 @@ import dev.medguard.app.data.local.room.dao.ScheduleDao
 import dev.medguard.app.data.local.room.entity.ScheduleEntity
 import dev.medguard.app.domain.model.Schedule
 import dev.medguard.app.domain.repository.ScheduleRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 class ScheduleRepositoryImpl (
@@ -12,8 +14,10 @@ class ScheduleRepositoryImpl (
         scheduleDao.insert(schedule.toEntity())
     }
 
-    override suspend fun getByMedicationId(medicationId: UUID): List<Schedule> {
-        return scheduleDao.getByMedicationId(medicationId)
+    override fun getByMedicationId(medicationId: UUID): Flow<List<Schedule>> {
+        return scheduleDao
+            .getByMedicationId(medicationId) // Flow<List<ScheduleEntity>>
+            .map { list -> list.map { it.toDomain() } }
     }
 
     override suspend fun getAllActive(): List<Schedule> {

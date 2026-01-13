@@ -33,14 +33,15 @@ class DoseRepositoryImpl(
     }
 
     override suspend fun getPendingDoses(): List<Dose> {
-        // optional convenience
-        return emptyList()
+        return doseDao.getByStatus(DoseStatus.PENDING).map { it.toDomain() }
     }
 
     override suspend fun getDosesForDate(date: LocalDate): List<Dose> {
-        val startDateTime = date.atStartOfDay()
-        return doseDao.getDosesForDate(startDateTime).map { it.toDomain() }
+        val start = date.atStartOfDay()
+        val end = start.plusDays(1)
+        return doseDao.getDosesBetween(start, end).map { it.toDomain() }
     }
+
 
     override suspend fun getPendingDosesBefore(expirationTime: LocalDateTime): List<Dose> {
         return doseDao

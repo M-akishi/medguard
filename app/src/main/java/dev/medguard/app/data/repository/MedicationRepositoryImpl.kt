@@ -14,11 +14,15 @@ class MedicationRepositoryImpl (
     }
 
     override suspend fun getById(id: UUID): Medication? {
-        return medicationDao.getById(id)?.toDomain()
+        return medicationDao
+            .getById(id)        // MedicationEntity?
+            ?.toDomain()
     }
 
     override suspend fun getAll(): List<Medication> {
-        return medicationDao.getAll()
+        return medicationDao
+            .getAll()           // List<MedicationEntity>
+            .map { it.toDomain() }
     }
 
     private fun Medication.toEntity(): MedicationEntity =

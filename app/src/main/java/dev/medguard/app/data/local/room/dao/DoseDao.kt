@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import dev.medguard.app.data.local.room.entity.DoseEntity
 import dev.medguard.app.domain.model.DoseStatus
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -47,11 +46,23 @@ interface DoseDao {
         expirationTime: LocalDateTime
     ): List<DoseEntity>
 
-    @Query(
-        """
-        SELECT * FROM doses
-        WHERE DATE(scheduledDateTime) = DATE(:dateTime)
-        """
-    )
-    suspend fun getDosesForDate(dateTime: LocalDateTime): List<DoseEntity>
+    @Query("""
+    SELECT * FROM doses
+    WHERE scheduledDateTime >= :start
+      AND scheduledDateTime < :end
+""")
+    suspend fun getDosesBetween(
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): List<DoseEntity>
+
+
+    @Query("""
+    SELECT * FROM doses
+    WHERE status = :status
+""")
+    suspend fun getByStatus(status: DoseStatus): List<DoseEntity>
+
+
+
 }
