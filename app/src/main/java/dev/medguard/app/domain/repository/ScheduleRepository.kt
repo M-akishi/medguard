@@ -5,9 +5,11 @@ import java.util.UUID
 
 interface ScheduleRepository {
 
-    fun insert(schedule: Schedule)
+    suspend fun insert(schedule: Schedule)
 
-    fun getByMedicationId(medicationId: UUID): List<Schedule>
+    suspend fun getByMedicationId(medicationId: UUID): List<Schedule>
 
-    fun getAllActive(): List<Schedule>
+    suspend fun getAllActive(): List<Schedule>
+
+    suspend fun getById(id: UUID): Schedule?
 }

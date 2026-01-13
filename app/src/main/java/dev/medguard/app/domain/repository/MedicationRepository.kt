@@ -5,9 +5,9 @@ import java.util.UUID
 
 interface MedicationRepository {
 
-    fun insert(medication: Medication)
+    suspend fun insert(medication: Medication)
 
-    fun getById(id: UUID): Medication?
+    suspend fun getById(id: UUID): Medication?
 
-    fun getAll(): List<Medication>
+    suspend fun getAll(): List<Medication>
 }

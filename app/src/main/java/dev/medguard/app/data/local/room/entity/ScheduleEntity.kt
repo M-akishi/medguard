@@ -2,7 +2,6 @@ package dev.medguard.app.data.local.room.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.DayOfWeek
 import java.time.LocalTime
 import java.util.UUID
 
@@ -13,7 +12,7 @@ data class ScheduleEntity(
     val medicationId: UUID,
     val time: LocalTime,
     val doseDescription: String,
-    val activeDays: Set<DayOfWeek>,
+    val activeDays: Set<dev.medguard.app.domain.model.DayOfWeek>,
     val isActive: Boolean
 )
 
