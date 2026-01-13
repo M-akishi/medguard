@@ -64,4 +64,25 @@ class RoomConverters {
     @TypeConverter
     fun toDoseStatus(value: String?): DoseStatus? =
         value?.let { DoseStatus.valueOf(it) }
+
+    @TypeConverter
+    fun fromDomainDayOfWeek(value: dev.medguard.app.domain.model.DayOfWeek?): String? =
+        value?.name
+
+    @TypeConverter
+    fun toDomainDayOfWeek(value: String?): dev.medguard.app.domain.model.DayOfWeek? =
+        value?.let { dev.medguard.app.domain.model.DayOfWeek.valueOf(it) }
+
+    @TypeConverter
+    fun fromDomainDayOfWeekSet(days: Set<dev.medguard.app.domain.model.DayOfWeek>?): String? =
+        days?.joinToString(",") { it.name }
+
+    @TypeConverter
+    fun toDomainDayOfWeekSet(value: String?): Set<dev.medguard.app.domain.model.DayOfWeek>? =
+        value
+            ?.takeIf { it.isNotBlank() }
+            ?.split(",")
+            ?.map { dev.medguard.app.domain.model.DayOfWeek.valueOf(it) }
+            ?.toSet()
+
 }

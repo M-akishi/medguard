@@ -9,6 +9,8 @@ import dev.medguard.app.data.local.room.dao.ScheduleDao
 import dev.medguard.app.data.local.room.entity.DoseEntity
 import dev.medguard.app.data.local.room.entity.MedicationEntity
 import dev.medguard.app.data.local.room.entity.ScheduleEntity
+import dev.medguard.app.data.local.room.RoomConverters
+
 
 @Database(
     entities = [
