@@ -4,13 +4,8 @@ import dev.medguard.app.domain.model.DayOfWeek
 import dev.medguard.app.domain.model.Schedule
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.util.UUID
 
-/**
- * Crea un horario (Schedule) y luego genera las dosis del día
- * para todos los horarios activos (incluyendo el recién creado).
- */
 class CreateScheduleAndGenerateDosesUseCase(
     private val createScheduleUseCase: CreateScheduleUseCase,
     private val generateDailyDosesUseCase: GenerateDailyDosesUseCase
@@ -20,9 +15,9 @@ class CreateScheduleAndGenerateDosesUseCase(
         medicationId: UUID,
         time: LocalTime,
         doseDescription: String,
-        activeDays: Set<DayOfWeek>,
-        zoneId: ZoneId = ZoneId.systemDefault()
+        activeDays: Set<DayOfWeek>
     ): Result<Schedule> {
+
         // 1) Crear el horario
         val result = createScheduleUseCase.execute(
             medicationId = medicationId,
@@ -31,15 +26,12 @@ class CreateScheduleAndGenerateDosesUseCase(
             activeDays = activeDays
         )
 
-        if (result.isFailure) return result
+        val createdSchedule = result.getOrElse { return Result.failure(it) }
 
-        // 2) Generar las dosis de HOY (para todos los schedules activos)
-        val today = LocalDate.now(zoneId)
-        generateDailyDosesUseCase.execute(
-            date = today,
-            zoneId = zoneId
-        )
+        // 2) Generar dosis + alarmas SOLO para HOY.
+        // El Worker diario se encargará de los días futuros.
+        generateDailyDosesUseCase.execute(LocalDate.now())
 
-        return result
+        return Result.success(createdSchedule)
     }
 }

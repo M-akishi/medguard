@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.room.Room
+import dev.medguard.app.data.android.DoseReminderSchedulerImpl
 import dev.medguard.app.data.local.room.MedGuardDatabase
 import dev.medguard.app.data.repository.MedicationRepositoryImpl
 import dev.medguard.app.data.repository.ScheduleRepositoryImpl
@@ -30,6 +31,7 @@ import dev.medguard.app.ui.theme.MedGuardTheme
 import kotlinx.coroutines.launch
 import dev.medguard.app.data.repository.DoseRepositoryImpl
 import dev.medguard.app.domain.model.Medication
+import dev.medguard.app.domain.reminder.DoseReminderScheduler
 import dev.medguard.app.domain.usecase.ConfirmDoseUseCase
 import dev.medguard.app.domain.usecase.GetDosesForDateUseCase
 import dev.medguard.app.domain.usecase.CreateScheduleAndGenerateDosesUseCase
@@ -41,11 +43,67 @@ import dev.medguard.app.domain.usecase.RecordLateIntakeUseCase
 import dev.medguard.app.presentation.dose.DoseListViewModel
 import java.time.Clock
 import java.util.UUID
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import dev.medguard.app.data.android.DailyDosesWorker
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.concurrent.TimeUnit
+
 
 
 class MainActivity : FragmentActivity() {
 
     private lateinit var biometricAuthManager: BiometricAuthManager
+    private val reminderScheduler: DoseReminderScheduler by lazy {
+        DoseReminderSchedulerImpl(applicationContext)
+    }
+
+    private fun scheduleDailyDosesWorker() {
+        val targetTime = LocalTime.of(2, 0)
+
+        val now = LocalDateTime.now()
+        var firstRun = now.withHour(targetTime.hour).withMinute(targetTime.minute)
+            .withSecond(0).withNano(0)
+
+        if (firstRun.isBefore(now)) {
+            firstRun = firstRun.plusDays(1)
+        }
+
+        val initialDelayMillis = Duration.between(now, firstRun).toMillis()
+
+        val request = PeriodicWorkRequestBuilder<DailyDosesWorker>(
+            1, TimeUnit.DAYS
+        )
+            .setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS)
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "daily_doses_generation",
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
+    }
+    private fun createNotificationChannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                "dose_reminders",
+                "Recordatorios de dosis",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notificaciones cuando es hora de tomar un medicamento"
+            }
+
+            val manager = getSystemService(android.app.NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
 
     private val database by lazy {
         Room.databaseBuilder(
@@ -54,6 +112,7 @@ class MainActivity : FragmentActivity() {
             "medguard.db"
         ).build()
     }
+
 
     private val medicationRepository by lazy {
         MedicationRepositoryImpl(database.medicationDao())
@@ -94,7 +153,8 @@ class MainActivity : FragmentActivity() {
     private val generateDailyDosesUseCase by lazy {
         GenerateDailyDosesUseCase(
             scheduleRepository = scheduleRepository,
-            doseRepository = doseRepository
+            doseRepository = doseRepository,
+            reminderScheduler = reminderScheduler
         )
     }
 
@@ -132,7 +192,24 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    100
+                )
+            }
+        }
+
         biometricAuthManager = BiometricAuthManager(this)
+        createNotificationChannel()
+
+        scheduleDailyDosesWorker()
 
         setContent {
             MedGuardTheme {

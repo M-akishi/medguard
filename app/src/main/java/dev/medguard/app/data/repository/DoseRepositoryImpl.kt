@@ -49,6 +49,11 @@ class DoseRepositoryImpl(
             .map { it.toDomain() }
     }
 
+    override suspend fun getPendingDosesAfter(from: LocalDateTime): List<Dose> {
+        val entities = doseDao.getPendingAfter("PENDING", from)
+        return entities.map { it.toDomain() }
+    }
+
     // Mapping extensions
 
     private fun Dose.toEntity(): DoseEntity =

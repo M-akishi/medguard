@@ -64,5 +64,10 @@ interface DoseDao {
     suspend fun getByStatus(status: DoseStatus): List<DoseEntity>
 
 
+    @Query("""
+        SELECT * FROM doses
+        WHERE status = :status AND scheduledDateTime > :after
+    """)
+    suspend fun getPendingAfter(status: String, after: LocalDateTime): List<DoseEntity>
 
 }

@@ -23,5 +23,7 @@ interface DoseRepository {
     suspend fun getDosesForDate(date: LocalDate): List<Dose>
 
     suspend fun getPendingDosesBefore(expirationTime: LocalDateTime): List<Dose>
+    suspend fun getPendingDosesAfter(from: LocalDateTime): List<Dose>
+
 }
 
