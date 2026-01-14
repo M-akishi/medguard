@@ -2,19 +2,23 @@ package dev.medguard.app.presentation.schedule
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import dev.medguard.app.domain.usecase.CreateScheduleAndGenerateDosesUseCase
 import dev.medguard.app.domain.usecase.GetAllActiveSchedulesUseCase
 
 class ScheduleListViewModelFactory(
-    private val getAllActiveSchedules: GetAllActiveSchedulesUseCase
+    private val getAllActiveSchedules: GetAllActiveSchedulesUseCase,
+    private val createScheduleAndGenerateDoses: CreateScheduleAndGenerateDosesUseCase
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ScheduleListViewModel::class.java)) {
             return ScheduleListViewModel(
-                getAllActiveSchedules = getAllActiveSchedules
+                getAllActiveSchedules = getAllActiveSchedules,
+                createScheduleAndGenerateDoses = createScheduleAndGenerateDoses
             ) as T
         }
-        throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+        throw IllegalArgumentException("Unknown ViewModel class $modelClass")
     }
 }
+

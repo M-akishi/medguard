@@ -67,4 +67,5 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.7.1")
     implementation("androidx.compose.ui:ui-text:1.7.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 }

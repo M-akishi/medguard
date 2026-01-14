@@ -1,7 +1,7 @@
 package dev.medguard.app
-
+import androidx.activity.viewModels
+import dev.medguard.app.biometric.BiometricAuthManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.room.Room
 import dev.medguard.app.data.local.room.MedGuardDatabase
 import dev.medguard.app.data.repository.MedicationRepositoryImpl
@@ -29,13 +30,22 @@ import dev.medguard.app.ui.theme.MedGuardTheme
 import kotlinx.coroutines.launch
 import dev.medguard.app.data.repository.DoseRepositoryImpl
 import dev.medguard.app.domain.model.Medication
+import dev.medguard.app.domain.usecase.ConfirmDoseUseCase
 import dev.medguard.app.domain.usecase.GetDosesForDateUseCase
-import dev.medguard.app.domain.usecase.ConfirmDoseTakenUseCase
+import dev.medguard.app.domain.usecase.CreateScheduleAndGenerateDosesUseCase
 import dev.medguard.app.presentation.dose.DoseListRoute
 import dev.medguard.app.presentation.dose.DoseListViewModelFactory
+import dev.medguard.app.domain.usecase.CreateScheduleUseCase
+import dev.medguard.app.domain.usecase.GenerateDailyDosesUseCase
+import dev.medguard.app.domain.usecase.RecordLateIntakeUseCase
+import dev.medguard.app.presentation.dose.DoseListViewModel
+import java.time.Clock
+import java.util.UUID
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
+
+    private lateinit var biometricAuthManager: BiometricAuthManager
 
     private val database by lazy {
         Room.databaseBuilder(
@@ -74,13 +84,56 @@ class MainActivity : ComponentActivity() {
     }
 
     private val confirmDoseTakenUseCase by lazy {
-        ConfirmDoseTakenUseCase(doseRepository)
+        ConfirmDoseUseCase(doseRepository)
+    }
+
+    private val createScheduleUseCase by lazy {
+        CreateScheduleUseCase(scheduleRepository)
+    }
+
+    private val generateDailyDosesUseCase by lazy {
+        GenerateDailyDosesUseCase(
+            scheduleRepository = scheduleRepository,
+            doseRepository = doseRepository
+        )
+    }
+
+    private val createScheduleAndGenerateDosesUseCase by lazy {
+        CreateScheduleAndGenerateDosesUseCase(
+            createScheduleUseCase = createScheduleUseCase,
+            generateDailyDosesUseCase = generateDailyDosesUseCase
+        )
+    }
+
+    private val scheduleFactory by lazy {
+        ScheduleListViewModelFactory(
+            getAllActiveSchedules = getAllActiveSchedulesUseCase,
+            createScheduleAndGenerateDoses = createScheduleAndGenerateDosesUseCase
+        )
+    }
+
+    private val recordLateIntakeUseCase by lazy {
+        RecordLateIntakeUseCase(
+            doseRepository = doseRepository,
+            clock = Clock.systemDefaultZone()
+        )
+    }
+
+    private val doseListViewModel: DoseListViewModel by viewModels {
+        DoseListViewModelFactory(
+            getDosesForDate = getDosesForDateUseCase,
+            confirmDoseTaken = confirmDoseTakenUseCase,
+            recordLateIntake = recordLateIntakeUseCase
+        )
     }
 
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        biometricAuthManager = BiometricAuthManager(this)
+
         setContent {
             MedGuardTheme {
                 var currentSection by remember { mutableStateOf(HomeSection.SCHEDULES) }
@@ -95,9 +148,6 @@ class MainActivity : ComponentActivity() {
                         medications = getAllMedicationsUseCase()
                     }
                 }
-                val scheduleFactory = ScheduleListViewModelFactory(
-                    getAllActiveSchedules = getAllActiveSchedulesUseCase
-                )
 
                 val medicationFactory = MedicationListViewModelFactory(
                     getAllMedications = getAllMedicationsUseCase,
@@ -105,8 +155,10 @@ class MainActivity : ComponentActivity() {
                 )
                 val doseFactory = DoseListViewModelFactory(
                     getDosesForDate = getDosesForDateUseCase,
-                    confirmDoseTaken = confirmDoseTakenUseCase
+                    confirmDoseTaken = confirmDoseTakenUseCase,
+                    recordLateIntake = recordLateIntakeUseCase
                 )
+
 
 
                 ModalNavigationDrawer(
@@ -156,12 +208,11 @@ class MainActivity : ComponentActivity() {
                                     ScheduleListRoute(
                                         factory = scheduleFactory,
                                         medications = medications,
-                                        onScheduleClick = { /* TODO */ },
-                                        onCreateSchedule = { medId, time, desc, days, isActive ->
-                                            // TODO: aquí vas a llamar a tu UseCase para crear Schedule
-                                        }
+                                        onScheduleClick = { /* TODO: detalle schedule */ }
                                     )
                                 }
+
+
                                 HomeSection.MEDICATIONS -> {
                                     MedicationListRoute(
                                         factory = medicationFactory,
@@ -171,7 +222,8 @@ class MainActivity : ComponentActivity() {
                                 HomeSection.DOSES -> {
                                     DoseListRoute(
                                         factory = doseFactory,
-                                        onDoseClick = { /* TODO: detalle de la toma si quieres */ }
+                                        onDoseClick = { /* TODO: detalle de la toma si quieres */ },
+                                        medications = medications
                                     )
                                 }
                             }
@@ -182,7 +234,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     private fun DrawerContent(
         currentSection: HomeSection,
@@ -221,5 +272,15 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
+    fun authenticateConfirmDose(doseId: UUID) {
+        biometricAuthManager.authenticateDose(doseId) { id ->
+            doseListViewModel.confirmDose(id)
+        }
+    }
 
+    fun authenticateLateIntake(doseId: UUID) {
+        biometricAuthManager.authenticateDose(doseId) { id ->
+            doseListViewModel.recordLateIntake(id)
+        }
+    }
 }

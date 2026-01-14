@@ -76,14 +76,20 @@ fun ScheduleListScreen(
             }
 
             else -> {
+                val medById = remember(medications) {
+                    medications.associateBy { it.id }
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(state.schedules, key = { it.id }) { schedule ->
+                        val medicationName = medById[schedule.medicationId]?.name?: "Medicamento Desconocido"
                         ScheduleItem(
                             schedule = schedule,
+                            medicationName = medicationName,
                             onClick = { onScheduleClick(schedule.id) }
                         )
                     }
@@ -121,6 +127,7 @@ fun ScheduleListScreen(
 @Composable
 private fun ScheduleItem(
     schedule: Schedule,
+    medicationName: String,
     onClick: () -> Unit
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -135,10 +142,19 @@ private fun ScheduleItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = timeText,
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = timeText,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = medicationName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = schedule.doseDescription,

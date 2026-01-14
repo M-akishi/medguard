@@ -2,18 +2,21 @@ package dev.medguard.app.presentation.dose
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.medguard.app.domain.usecase.ConfirmDoseTakenUseCase
+import dev.medguard.app.domain.usecase.ConfirmDoseUseCase
 import dev.medguard.app.domain.usecase.GetDosesForDateUseCase
+import dev.medguard.app.domain.usecase.RecordLateIntakeUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
 
 class DoseListViewModel(
     private val getDosesForDate: GetDosesForDateUseCase,
-    private val confirmDoseTaken: ConfirmDoseTakenUseCase,
+    private val confirmDoseUseCase: ConfirmDoseUseCase,
+    private val recordLateIntakeUseCase: RecordLateIntakeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DoseListUiState())
@@ -50,19 +53,58 @@ class DoseListViewModel(
         }
     }
 
-    fun onConfirmDoseClick(doseId: UUID) {
+    fun confirmDose(doseId: UUID) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(confirmingId = doseId)
-            try {
-                confirmDoseTaken(doseId)
-                refresh() // recarga la lista
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    errorMessage = e.message ?: "Error confirmando toma"
-                )
-            } finally {
-                _uiState.value = _uiState.value.copy(confirmingId = null)
+            // marcar que estamos confirmando esta dosis
+            _uiState.update { it.copy(confirmingId = doseId, errorMessage = null) }
+
+            val result = confirmDoseUseCase.execute(doseId)
+
+            result
+                .onSuccess {
+                    // recargar las tomas (para actualizar status TAKEN)
+                    refresh()
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            confirmingId = null,
+                            errorMessage = error.message
+                                ?: "No se pudo confirmar la toma"
+                        )
+                    }
+                }
             }
+        }
+
+    fun recordLateIntake(doseId: UUID) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    confirmingId = doseId,
+                    errorMessage = null
+                )
+            }
+
+            recordLateIntakeUseCase.execute(doseId)
+                .onSuccess { updatedDose ->
+                    _uiState.update { state ->
+                        state.copy(
+                            confirmingId = null
+                        )
+                    }
+                    // recargar lista del día
+                    refresh()
+                }
+                .onFailure { error ->
+                    _uiState.update { state ->
+                        state.copy(
+                            confirmingId = null,
+                            errorMessage = error.message
+                                ?: "No se pudo registrar la toma tardía"
+                        )
+                    }
+                }
         }
     }
 }

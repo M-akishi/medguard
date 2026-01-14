@@ -13,14 +13,7 @@ import java.util.UUID
 fun ScheduleListRoute(
     factory: ScheduleListViewModelFactory,
     medications: List<Medication>,
-    onScheduleClick: (UUID) -> Unit = {},
-    onCreateSchedule: (
-        medicationId: UUID,
-        time: LocalTime,
-        doseDescription: String,
-        activeDays: Set<DayOfWeek>,
-        isActive: Boolean
-    ) -> Unit
+    onScheduleClick: (UUID) -> Unit = {}
 ) {
     val viewModel: ScheduleListViewModel = viewModel(factory = factory)
     val uiState by viewModel.uiState.collectAsState()
@@ -29,8 +22,12 @@ fun ScheduleListRoute(
         state = uiState,
         onRetry = viewModel::refresh,
         onScheduleClick = onScheduleClick,
-        onCreateSchedule = onCreateSchedule,
+        onCreateSchedule = { medId, time, desc, days, isActive ->
+            viewModel.createSchedule(medId, time, desc, days, isActive)
+        },
         medications = medications
     )
 }
+
+
 
