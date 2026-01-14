@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.medguard.app.domain.usecase.ConfirmDoseUseCase
 import dev.medguard.app.domain.usecase.GetDosesForDateUseCase
+import dev.medguard.app.domain.usecase.MarkMissedDosesUseCase
 import dev.medguard.app.domain.usecase.RecordLateIntakeUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,14 +17,27 @@ import java.util.UUID
 class DoseListViewModel(
     private val getDosesForDate: GetDosesForDateUseCase,
     private val confirmDoseUseCase: ConfirmDoseUseCase,
-    private val recordLateIntakeUseCase: RecordLateIntakeUseCase
+    private val recordLateIntakeUseCase: RecordLateIntakeUseCase,
+    private val markMissedDosesUseCase: MarkMissedDosesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DoseListUiState())
     val uiState: StateFlow<DoseListUiState> = _uiState.asStateFlow()
 
     init {
-        refreshForDate(LocalDate.now())
+        viewModelScope.launch {
+            markMissedDosesUseCase.execute()
+            refreshForDate(LocalDate.now())
+        }
+    }
+
+    fun onScreenOpened() {
+        viewModelScope.launch {
+            // 1) Marcar como MISSED las PENDING cuyo tiempo ya expiró
+            markMissedDosesUseCase.execute()
+            // 2) Refrescar lista para la fecha actual
+            refresh()
+        }
     }
 
     fun refresh() {
@@ -107,4 +121,5 @@ class DoseListViewModel(
                 }
         }
     }
+
 }

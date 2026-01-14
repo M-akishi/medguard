@@ -19,7 +19,7 @@ fun DoseListRoute(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.refresh()
+        viewModel.onScreenOpened()
     }
 
     DoseListScreen(
@@ -29,3 +29,4 @@ fun DoseListRoute(
         medications = medications
     )
 }
+

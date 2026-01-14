@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import dev.medguard.app.domain.usecase.ConfirmDoseUseCase
 import dev.medguard.app.domain.usecase.GetDosesForDateUseCase
 import dev.medguard.app.domain.usecase.RecordLateIntakeUseCase
+import dev.medguard.app.domain.usecase.MarkMissedDosesUseCase
 
 class DoseListViewModelFactory(
     private val getDosesForDate: GetDosesForDateUseCase,
     private val confirmDoseTaken: ConfirmDoseUseCase,
-    private val recordLateIntake: RecordLateIntakeUseCase
+    private val recordLateIntake: RecordLateIntakeUseCase,
+    private val markMissedDosesUseCase: MarkMissedDosesUseCase
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -18,7 +20,8 @@ class DoseListViewModelFactory(
             return DoseListViewModel(
                 getDosesForDate = getDosesForDate,
                 confirmDoseUseCase = confirmDoseTaken,
-                recordLateIntakeUseCase = recordLateIntake
+                recordLateIntakeUseCase = recordLateIntake,
+                markMissedDosesUseCase = markMissedDosesUseCase
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

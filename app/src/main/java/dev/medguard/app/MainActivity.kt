@@ -1,4 +1,7 @@
 package dev.medguard.app
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import androidx.activity.viewModels
 import dev.medguard.app.biometric.BiometricAuthManager
 import android.os.Bundle
@@ -51,6 +54,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dev.medguard.app.data.android.DailyDosesWorker
+import dev.medguard.app.domain.usecase.MarkMissedDosesUseCase
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -91,16 +95,16 @@ class MainActivity : FragmentActivity() {
         )
     }
     private fun createNotificationChannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = android.app.NotificationChannel(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
                 "dose_reminders",
                 "Recordatorios de dosis",
-                android.app.NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Notificaciones cuando es hora de tomar un medicamento"
             }
 
-            val manager = getSystemService(android.app.NotificationManager::class.java)
+            val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
     }
@@ -146,6 +150,15 @@ class MainActivity : FragmentActivity() {
         ConfirmDoseUseCase(doseRepository)
     }
 
+    private val markMissedDosesUseCase by lazy {
+        MarkMissedDosesUseCase(
+            doseRepository = doseRepository,
+            clock = Clock.systemDefaultZone(),
+            confirmationWindow = Duration.ofHours(1)   // misma ventana que en la UI
+        )
+    }
+
+
     private val createScheduleUseCase by lazy {
         CreateScheduleUseCase(scheduleRepository)
     }
@@ -183,7 +196,8 @@ class MainActivity : FragmentActivity() {
         DoseListViewModelFactory(
             getDosesForDate = getDosesForDateUseCase,
             confirmDoseTaken = confirmDoseTakenUseCase,
-            recordLateIntake = recordLateIntakeUseCase
+            recordLateIntake = recordLateIntakeUseCase,
+            markMissedDosesUseCase = markMissedDosesUseCase
         )
     }
 
@@ -195,12 +209,12 @@ class MainActivity : FragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
+                    Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     100
                 )
             }
@@ -233,7 +247,8 @@ class MainActivity : FragmentActivity() {
                 val doseFactory = DoseListViewModelFactory(
                     getDosesForDate = getDosesForDateUseCase,
                     confirmDoseTaken = confirmDoseTakenUseCase,
-                    recordLateIntake = recordLateIntakeUseCase
+                    recordLateIntake = recordLateIntakeUseCase,
+                    markMissedDosesUseCase = markMissedDosesUseCase,
                 )
 
 

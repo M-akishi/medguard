@@ -1,6 +1,7 @@
 package dev.medguard.app.domain.usecase
 
 import dev.medguard.app.domain.model.Dose
+import dev.medguard.app.domain.model.DoseStatus
 import dev.medguard.app.domain.repository.DoseRepository
 import java.time.Clock
 import java.time.LocalDateTime
@@ -33,9 +34,22 @@ class RecordLateIntakeUseCase(
             )
         }
 
-        val updatedDose = dose.copy(
-            lateIntakeAt = now
-        )
+        val updatedDose = when (dose.status) {
+            DoseStatus.PENDING -> {
+                // 👉 Nueva regla: de PENDING pasa a MISSED al registrar tardía
+                dose.copy(
+                    status = DoseStatus.MISSED,
+                    lateIntakeAt = now
+                )
+            }
+            else -> {
+                // TAKEN, MISSED u otros estados: no cambiamos el status,
+                // solo registramos que se tomó tarde.
+                dose.copy(
+                    lateIntakeAt = now
+                )
+            }
+        }
 
         doseRepository.update(updatedDose)
 

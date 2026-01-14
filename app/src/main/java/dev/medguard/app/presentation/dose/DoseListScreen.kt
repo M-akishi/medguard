@@ -1,4 +1,5 @@
 package dev.medguard.app.presentation.dose
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -52,7 +53,7 @@ fun DoseListScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         when {
-            state.isLoading -> {
+            state.isLoading && state.doses.isEmpty() -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -113,7 +114,21 @@ fun DoseListScreen(
             }
         }
 
-        // Mensaje de error global abajo
+        if (state.isLoading && state.doses.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center)
+                    .background(
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.3f)
+                    )
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+
         state.errorMessage?.let { msg ->
             Text(
                 text = msg,
@@ -125,6 +140,7 @@ fun DoseListScreen(
             )
         }
     }
+
 }
 @Composable
 private fun DoseItem(
