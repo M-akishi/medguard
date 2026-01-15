@@ -1,5 +1,6 @@
 package dev.medguard.app.presentation.schedule
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.medguard.app.domain.model.DayOfWeek
 import dev.medguard.app.domain.model.Medication
 import dev.medguard.app.domain.model.Schedule
+import dev.medguard.app.ui.theme.MedGuardTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -137,7 +140,6 @@ private fun ScheduleItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-        // .clickable(onClick = onClick) si luego quieres navegación
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -198,3 +200,104 @@ private fun formatDays(days: Set<DayOfWeek>): String {
 
     return labels.joinToString(", ")
 }
+
+@Preview(
+    name = "Light",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true
+)
+@Composable
+fun ScheduleListScreenPreviewLight() {
+    MedGuardTheme(darkTheme = false) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val fakeMedications = sampleMedications
+            val fakeSchedules = sampleSchedules
+
+            ScheduleListScreen(
+                state = ScheduleListUiState(
+                    isLoading = false,
+                    schedules = fakeSchedules,
+                    errorMessage = null
+                ),
+                onRetry = {},
+                onScheduleClick = { /* no-op en preview */ },
+                onCreateSchedule = { _, _, _, _, _ -> /* no-op en preview */ },
+                medications = fakeMedications
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true
+)
+@Composable
+fun ScheduleListScreenPreviewDark() {
+    MedGuardTheme(darkTheme = true) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val fakeMedications = sampleMedications
+            val fakeSchedules = sampleSchedules
+
+            ScheduleListScreen(
+                state = ScheduleListUiState(
+                    isLoading = false,
+                    schedules = fakeSchedules,
+                    errorMessage = null
+                ),
+                onRetry = {},
+                onScheduleClick = {},
+                onCreateSchedule = { _, _, _, _, _ -> },
+                medications = fakeMedications
+            )
+        }
+    }
+}
+
+
+private val sampleMedications = listOf(
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Paracetamol 500mg",
+    ),
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Ibuprofeno 400mg",
+    )
+)
+
+private val sampleSchedules = listOf(
+    Schedule(
+        id = UUID.randomUUID(),
+        medicationId = sampleMedications[0].id,
+        time = LocalTime.of(8, 0),
+        doseDescription = "1 comprimido en ayunas",
+        activeDays = setOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY,
+            DayOfWeek.FRIDAY
+        ),
+        isActive = true
+    ),
+    Schedule(
+        id = UUID.randomUUID(),
+        medicationId = sampleMedications[1].id,
+        time = LocalTime.of(20, 0),
+        doseDescription = "1 comprimido después de la comida",
+        activeDays = setOf(
+            DayOfWeek.SATURDAY,
+            DayOfWeek.SUNDAY
+        ),
+        isActive = true
+    )
+)
+

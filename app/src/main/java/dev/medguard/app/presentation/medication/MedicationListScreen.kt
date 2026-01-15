@@ -1,5 +1,6 @@
 package dev.medguard.app.presentation.medication
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.medguard.app.domain.model.Medication
+import dev.medguard.app.ui.theme.MedGuardTheme
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -199,3 +202,86 @@ private fun AddMedicationDialog(
         }
     )
 }
+
+@Preview(
+    name = "Light",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true)
+@Composable
+fun MedicationListScreenLight() {
+    MedGuardTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+
+            val fakeMedications = sampleMedications
+
+            MedicationListScreen(
+                state = MedicationListUiState(
+                    isLoading = false,
+                    medications = fakeMedications,
+                    errorMessage = "",
+                    isAddDialogVisible = false,
+                    newName = "",
+                    newNotes = ""
+                ),
+                onRetry = {},
+                onAddClick = {},
+                onDismissAddDialog = {},
+                onNewNameChange = {},
+                onNewNotesChange = {},
+                onConfirmAddMedication = {},
+                onMedicationClick = {}
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true)
+@Composable
+fun MedicationListScreenDark() {
+    MedGuardTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+
+            val fakeMedications = sampleMedications
+
+            MedicationListScreen(
+                state = MedicationListUiState(
+                    isLoading = false,
+                    medications = fakeMedications,
+                    errorMessage = "",
+                    isAddDialogVisible = false,
+                    newName = "",
+                    newNotes = ""
+                ),
+                onRetry = {},
+                onAddClick = {},
+                onDismissAddDialog = {},
+                onNewNameChange = {},
+                onNewNotesChange = {},
+                onConfirmAddMedication = {},
+                onMedicationClick = {}
+            )
+        }
+    }
+}
+
+private val sampleMedications = listOf(
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Paracetamol",
+        notes = "500mg"
+    ),
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Ibuprofeno",
+        notes = "200mg"
+    )
+)

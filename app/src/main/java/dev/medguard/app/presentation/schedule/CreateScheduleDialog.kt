@@ -24,8 +24,11 @@ import java.util.UUID
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.foundation.AnchorType
 import dev.medguard.app.R
+import dev.medguard.app.domain.usecase.CreateScheduleUseCase
+import dev.medguard.app.ui.theme.MedGuardTheme
 
 @Composable
 fun CreateScheduleDialog(
@@ -300,4 +303,30 @@ private fun DaysOfWeekSelector(
         }
     }
 }
+
+
+@Preview(showBackground = true, name = "CreateSchedule - Success")
+@Composable
+fun CreateScheduleDialogPreview() {
+    MedGuardTheme {
+        CreateScheduleDialog(
+            medications = sampleMedications,
+            onDismiss = {},
+            onConfirm = { medicationId, time, doseDescription, activeDays, isActive ->
+            }
+        )
+    }
+}
+
+private val sampleMedications = listOf(
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Paracetamol 500mg",
+    ),
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Ibuprofeno 400mg",
+    )
+)
+
 

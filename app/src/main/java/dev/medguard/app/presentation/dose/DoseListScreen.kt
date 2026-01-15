@@ -1,4 +1,5 @@
 package dev.medguard.app.presentation.dose
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.tooling.preview.Preview
+import dev.medguard.app.ui.theme.MedGuardTheme
 import kotlinx.coroutines.delay
 
 
@@ -305,3 +308,98 @@ private fun DoseItem(
         }
     }
 }
+
+@Preview(
+    name = "Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true)
+@Composable
+fun DoseListScreenPreviewDark() {
+    MedGuardTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val fakeMedications = sampleMedications
+
+            val fakeDoses = sampleDoses
+
+            DoseListScreen(
+                state = DoseListUiState(
+                    isLoading = false,
+                    errorMessage = null,
+                    doses = fakeDoses,
+                    // si tu UiState tiene más campos (ej: confirmingId), agrégalos aquí:
+                    // confirmingId = null
+                ),
+                onRetry = {},
+                onDoseClick = {},
+                medications = fakeMedications
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Light",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true)
+@Composable
+fun DoseListScreenPreviewLight() {
+    MedGuardTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val fakeMedications = sampleMedications
+
+            val fakeDoses = sampleDoses
+
+            DoseListScreen(
+                state = DoseListUiState(
+                    isLoading = false,
+                    errorMessage = null,
+                    doses = fakeDoses,
+                ),
+                onRetry = {},
+                onDoseClick = {},
+                medications = fakeMedications
+            )
+        }
+    }
+}
+
+private val sampleMedications = listOf(
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Paracetamol 500mg",
+    ),
+    Medication(
+        id = UUID.randomUUID(),
+        name = "Ibuprofeno 400mg",
+    )
+)
+
+private val sampleDoses = listOf(
+    Dose(
+        id = UUID.randomUUID(),
+        scheduleId = UUID.randomUUID(),
+        medicationId = sampleMedications[0].id,
+        scheduledDateTime = LocalDateTime.now().plusMinutes(15),
+        doseDescription = "1 comprimido después de comer",
+        status = DoseStatus.PENDING,
+        takenAt = null,
+        lateIntakeAt = null
+    ),
+    Dose(
+        id = UUID.randomUUID(),
+        scheduleId = UUID.randomUUID(),
+        medicationId = sampleMedications[1].id,
+        scheduledDateTime = LocalDateTime.now().minusMinutes(10),
+        doseDescription = "1 comprimido con agua",
+        status = DoseStatus.MISSED,
+        takenAt = null,
+        lateIntakeAt = null
+    )
+)
+
